@@ -60,16 +60,33 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
       - 128 GB, Intel Core i9-13900 vPro (32 vCPUs, 8 + 16 cores, 220 W)
       - NVIDIA 4000 Ada
     - Workstation w/o a GPU is practical, OEMs have x1.5-x2.5 markup on GPUs
-- Freestanding "build your own box" pricing
+- "Build Your Own Box" Pricing
   - Workstation Tower or Rackmount Server?
     - Will likely just SSH/remote in from laptop either way, so, server may be the best choice
       - far from desk, co-lo if needed, easier to integrate hot-swappable redundant parts (PSU), UPS, networking, and cooling (fan noise somewhere else)
       - downside is "server/enterprise" grade components can be pricier
-  - Software stack
+  - £0.00 Software Stack (it's all FOSS)
     - XCP-ng + Xen Orchestra as bare-metal host for Xen, primarily running FreeBSD 14 (ZFS) + bhyve
       - Xen and bhyve have full GPU passthrough for Debian & Alpine VMs (if not via ports/Linuxulator)
         - bhyve may need `vnc` enabled to give the driver a VGA buffer on FreeBSD and Windows guests
         - NVIDIA closed-source drivers will probably be essential, c'est la vie
+    - Data Science / Processing
+      - DuckDB, Postgres + `pgvector`, Ibis, NumPy, Numba, SciPy, PySR, FAISS
+    - ML
+      - Keras 3.0 (JAX, PyTorch, TensorFlow)
+      - [JAX](https://github.com/n2cholas/awesome-jax)
+        - Equinox, Elegy, Flax (NNX) & `flaxmodels`, Haiku, Trax, Jraph, Objax, Levanter, `sklearn-jax-kernels`, `efficientnet-jax`
+        - FedJAX, Neural Tangents, `ensemble_net` & `ood_focal_loss`, Lorax, AQT (Accurate Quantized Training)
+        - `f_net` FNet, T5X, `MaxText`, GPT-J
+        - chex, Haliax, `CommonLoopUtils`, `JAX-tqdm`
+        - Optax, Diffrax, Optimistix, Lineax, `sympy2jax`, `scalable_shampoo` Shampoo, `generax`, `jax-flows`, `parallel-non-linear-gaussian-smoothers` (Kalman Filtering)
+        - NumPyro, BlackJAX, Distrax, Bayex, Bayes-Newton, `JAXNS`, Oryx, MCX, `jxf`
+        - RLax, PureJaxRL, coax, `Mctx`, Jumanji
+      - interpretML (EBM, DiCE, GAM Changer), scikit-learn / sklearn
+      - Kolmogorov-Arnold Networks (KAN)
+        - `pykan`, `efficient-kan`, `FourierKAN`, `GraphKAN`, `kanrl`
+    - Visualisation
+      - HoloViz (handles Bokeh, Matplotlib, and Plotly, supports seaborn and graphviz)
   - ~£7000, ~£4800 in "compute", ~£1700 in storage, ~£500 for chassis & power
     - £1,238.99 CPU (assuming DDDR5, older chips with DDR4 will be much cheaper, also used available)
       - [SCAN AMD CPUs](https://www.scan.co.uk/shop/computer-hardware/cpu-amd-server/all)
@@ -139,19 +156,19 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
         - Supports 4 external SRV240RLBP-9A battery packs
     - so, (automatic) shutdown, logging, "checkpoint", use "autosave" snapshots for a delta-based "interrupt" checkpoint/snapshot, so long as we can reliably flush to disk, still relying on good snapshot and backup management
     - if we're at a co-lo of some description, this is likely something handled where they will have some X hours of backup generator fuel or batteries at the ready, though they might not be able to provide the hours of runtime, though they have some absolutely overbuilt power delivery anyway, so it takes a lot more for them to experience trouble at all
-- AI/GPU Cloud pricing
+- AI/GPU Cloud Pricing
   - [CoreWeave](https://www.coreweave.com/gpu-cloud-pricing)
     - ...
   - [RunPod.io](https://www.runpod.io/pricing)
     - ...
-- VPS Cloud pricing
+- VPS Cloud Pricing
   - Hetzner (dedicated and volumes are stopped at account limits, can go higher)
     - €7.56/month Intel Xeon Gold (8 GB, 4 vCPUs, shared)
     - €65.28/month AMD EPYC 7002 (32 GB, 16 vCPUs, shared)
-    - €230.39/month AMD EPYC 7003 or 9004 (128 GB, 32 vCPUs, dedicated)
     - €57.59/month AMD EPYC 7003 or 9004 (32 GB, 8 vCPUs, dedicated)
-    - €52.80/month Volume (1000 GB, €0.0528/GB/month, including VAT)
-- Cloud pricing
+    - €230.39/month AMD EPYC 7003 or 9004 (128 GB, 32 vCPUs, dedicated)
+    - €52.80/month Volume (1 TB, €0.0528/GB/month, including VAT)
+- Cloud Pricing
   - Azure
     - £836.89/month D32ds v4 (128 GB, 32 vCPUs)
     - £767.70/month NC16as T4 v3 (110 GB, 16 AMD EPYC 7v12 vCPUs, NVIDIA T4 (16 GB))
