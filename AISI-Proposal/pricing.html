@@ -2,7 +2,7 @@
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>Index for &lbrack;AISI Proposal&rbrack;&lpar;https&colon;&sol;&sol;www&period;aisi&period;gov&period;uk&sol;grants&rpar;</title>
+            <title>Tentative pricing for drafting a budget &lpar;2024-10-22&rpar;</title>
             <style>
 /* From extension vscode.github */
 /*---------------------------------------------------------------------------------------------
@@ -91,7 +91,8 @@ body.marp-vscode blockquote {
 }
 
 </style>
-            
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
 <style>
@@ -214,15 +215,291 @@ body.marp-vscode blockquote {
             <span id="markdown-mermaid" aria-hidden="true"
                     data-dark-mode-theme="dark"
                     data-light-mode-theme="default"></span>
-                <h1 id="index-for-aisi-proposal">Index for <a href="https://www.aisi.gov.uk/grants">AISI Proposal</a></h1>
+                <h1 id="tentative-pricing-for-drafting-a-budget-2024-10-22">Tentative pricing for drafting a budget (2024-10-22)</h1>
+<p>A good example of some more realistic cloud-native (spot) pricing is given in <a href="https://mitchgordon.me/ml/2022/07/01/retro-is-blazing.html">RETRO Is Blazingly Fast</a> where the cost (~$1k) was largely dominated by re-embedding the entire dataset (note, they did not re-train):</p>
+<blockquote>
+<p>Tokenization takes around 1.9 min / 1M chunks on your standard CPU core. The Pile ends up being around 5.8B chunks (370B tokens), so that means you’re looking at ~180 hours of CPU time to tokenize, which you can easily parallelize down to only a few hours of wall time.</p>
+<p>With a CPU core on the cloud going for around $0.03 / hour, that means you’ll spend less than $10 on tokenization.</p>
+<p>BERT embedding is the most expensive step. On an RTX A5000, BERT embedding takes around 10 minutes per 1M chunks. That’s around 1k GPU hours to embed The Pile, which again is trivial to parallelize. This cost around $1k on CoreWeave.</p>
+<p>Note that BERT embeddings are around 3 KB each on disk. (768 float32s). 5.8B of them takes up about 16 TB on disk, so watch out for that. (Disk space is cheap.)</p>
+<p>One particular trick used by FAISS (the inverted file structure) requires taking a small percentage of the data (64M embeddings) and using them to train the index. On a V100 GPU, this only took around 4 hours, so the cost was negligible.</p>
+<p>Once the index is trained, we can add all the embeddings to the index, compressing them for lookup. This takes longer than you’d expect (around 192 CPU hours) but ultimately only represents a cost of &lt;$30.</p>
+<p>The FAISS index is not totally cost free. The index itself ends up being big, requiring around 176 GB of RAM to query, which costs about $0.88 per hour on your average cloud provider.</p>
+<p>However, this allows you to drastically reduce your GPU usage. Say, for example, you need 5 GPUs running in parallel to do inference on a 175B parameter model, which costs around $6 an hour. By adding an extra $0.88 / hour in CPU RAM, you can reduce the number of GPUs you have to run to just 1, saving around $5 / hour in GPU costs.</p>
+<p>This also applies to models that are already using a single GPU. By shrinking your model with RETRO’s database, requests get served faster, meaning more GPU bang for your buck. Instead of serving 60 req / hour on a single GPU, you’re serving 600+, just for a little extra CPU RAM.</p>
+<p>FAISS has the ability to memory map an index, which allows you to read it directly from disk instead of allocating RAM for it. This is slightly slower, of course, but probably worth the trade. (Thanks rom1504.)</p>
+</blockquote>
 <ul>
-<li><a href="./Quick%20meeting%20summary.html">2024-10-17 Meeting (Alex and Francis)</a></li>
-<li><a href="./meeting-2024-10-21.html">2024-10-21 Meeting (Andy, Alex, Francis)</a></li>
-<li><a href="./names.html">2024-10-22 A few possible names</a></li>
-<li><a href="./pricing.html">2024-10-22 Tentative pricing for drafting a budget</a></li>
+<li>Expected Hardware Requirements (Initial Pass)
+<ul>
+<li>20+ TB storage (size of RETRO embeddings, bigger vector DB &amp; indices is good price/performance)
+<ul>
+<li>&quot;best&quot; managed as a JBOD, but ~4 HDDs (or SSDs) are easy to fit in a workstation/server
+<ul>
+<li>JBOD: &quot;just a bunch of disks&quot;</li>
+<li>we will want some measure of redundancy (ZFS/RAID and cold spares for resilver/rebuild)</li>
+<li>backups will need to be handled, Backblaze could be a good &quot;quick and dirty&quot; approach</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>ideally 256 GB RAM, minimum 64-128 GB, ECC RDIMMs are a must</li>
+<li>ideally 32-64 vCPUs, potentially, minimum 24 vCPUs (16 cores or 8+16 cores)</li>
+<li>sufficient bandwidth</li>
+<li>1x 20 GB GPU should suffice, can spot rent 4-8+ GPU configs if needed (AI/GPU cloud)</li>
+</ul>
+</li>
+<li>Example &quot;one box&quot; workstation pricing
+<ul>
+<li>Stone (without VAT) (and no GPU! so not even &quot;one box&quot;)
+<ul>
+<li>£3264.68 Lenovo ThinkStation P620
+<ul>
+<li>64 GB of 1 TB, Ryzen Threadripper PRO 5965WX (48 vCPUs, 280 W)</li>
+</ul>
+</li>
+<li>£1706.29 Dell Precision 7865
+<ul>
+<li>32 GB of 1 TB, Ryzen Threadripper PRO 5945WX (24 vCPUs, 280 W)</li>
+</ul>
+</li>
+<li>£1359.92 Lenovo ThinkStation P3
+<ul>
+<li>32 GB of 128 GB, Intel Core i9 i9-14900K (32 vCPUs, 8 + 16 cores, 250 W)</li>
+</ul>
+</li>
+<li>£4076.31 HPE ProLiant DL380 Gen11 (2U)
+<ul>
+<li>128 GB of 8 TB, Xeon Silver 4514Y (32 vCPUs, 150 W)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Direct from OEM (excluding VAT, for US sites currently $1 : £1.2~1.3)
+<ul>
+<li>£4,155.88 Dell Precision 5860
+<ul>
+<li>128 GB of 2 TB, Intel Xeon W5-2465X (32 vCPUs, 200 W)</li>
+<li>NVIDIA 4000 Ada</li>
+</ul>
+</li>
+<li>£5,070.84 Dell Precision 7875
+<ul>
+<li>128 GB of 2 TB, AMD Ryzen Threadripper PRO 7955WX (32 vCPUs, 350 W)</li>
+<li>NVIDIA 4000 Ada</li>
+</ul>
+</li>
+<li>£5,728.63 Dell Precision 7960
+<ul>
+<li>128 of 2 TB, Intel Xeon w5-3433 (32 vCPUs, 220 W)</li>
+<li>NVIDIA 4000 Ada</li>
+</ul>
+</li>
+<li>£6,665.43 Dell Precision 7960 Rack (2U)
+<ul>
+<li>128 GB of 2 TB, Intel Xeon Silver 4514Y (32 vCPUs, 150 W)</li>
+<li>NVIDIA 4000 Ada</li>
+</ul>
+</li>
+<li>$3,969.00 Lenovo ThinkStation P3 (~£5200)
+<ul>
+<li>128 GB, Intel Core i9-13900 vPro (32 vCPUs, 8 + 16 cores, 220 W)</li>
+<li>NVIDIA 4000 Ada</li>
+</ul>
+</li>
+<li>Workstation w/o a GPU is practical, OEMs have x1.5-x2.5 markup on GPUs</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>freestanding &quot;build your own box&quot; pricing
+<ul>
+<li>workstation tower or &quot;workstation&quot; server
+<ul>
+<li>based on personal experience, will likely just SSH/remote in from laptop either way</li>
+<li>so, server, yes?
+<ul>
+<li>it can sit in a nicer location, co-lo if needed, easier integration with baseline UPS, networking, and cooling (fan noise somewhere else), &quot;server/enterprise&quot; grade components (motherboard, PSU) can be pricier, easier to integrate hot-swappable redundant parts (PSU), etc</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>software
+<ul>
+<li>XCP-ng or FreeBSD as bare-metal host for Xen (ZFS)
+<ul>
+<li>Xen/bhyve provides GPU passthrough for Debian &amp; Alpine VMs, doubt anything else needed</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>~£6500, ~£4800 in &quot;compute&quot;, ~£1700 in storage
+<ul>
+<li>20 TB + 10 TB redundancy, £800 in storage (HDDs) or £1500 in storage (SSDs)
+<ul>
+<li>£1,680 7x WD Blue SN5000 (4 TB) for 20 TB volume with 8 TB parity or parity + cold (example)</li>
+<li>~5 TB parity, ~5 TB cold spare (hot-swap and resilver/rebuild with)</li>
+<li>see <a href="https://diskprices.com/?locale=uk">Disk Prices</a> and <a href="https://www.mouser.co.uk">Mouser</a>
+<ul>
+<li>£15-25/TB HDDs (£300-500 / 20 TB), would use mixed drives, <a href="https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data">see Drive Stats</a>
+<ul>
+<li>£235 Seagate Exos X18 Enterprise Class (16 TB, £14.69/TB)</li>
+<li>£210 Seagate IronWolf Pro (14 TB, £15.00/TB)</li>
+<li>£360 Toshiba MG Enterprise (22 TB, £16.36/TB)</li>
+<li>£228 WD Red Plus NAS (10 TB, £22.81/TB)</li>
+<li>£195 WD_BLACK D10 (8 TB, £24.38/TB)</li>
+</ul>
+</li>
+<li>£50-60/TB SSDs (£1000-2000 / 20 TB), better performance &amp; reliability at higher cost
+<ul>
+<li>£190 Kingston NV2 (4 TB SSD, £47.50/TB)</li>
+<li>£101 Samsung 990 EVO (2 TB, £50.60/TB)</li>
+<li>£240 WD Blue SN5000 (4 TB, £60.0/TB)</li>
+<li>£750 WD_Black SN850X (8 TB, £93.74/TB)</li>
+<li>£3,232.91 Solidigm D5-P5336 (30.72 TB, £105.24/TB)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>~£1200 DDR5 ECC RDIMMs (256 GB, see <a href="https://www.scan.co.uk/shop/computer-hardware/memory-ram/ddr5-server-ram-memory-kits-5600">SCAN</a>)
+<ul>
+<li>£300 1x64 GB DDR5 ECC RDIMM (4800-5600 MT/s)
+<ul>
+<li>£600 for 128 GB, £1200 for 256 GB, £4800 for 1 TB</li>
+</ul>
+</li>
+<li>£170 1x64 GB DDR4 ECC RDIMM (3200 MT/s)
+<ul>
+<li>£340 for 128 GB, £680 for 256 GB, £2720 for 1 TB</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>£1,339.99 NVIDIA RTX 4000 Ada (20 GB, 130 W)
+<ul>
+<li><a href="https://www.scan.co.uk/shop/pro-graphics/nvidia-workstation-gpus/all">SCAN Workstation GPUs</a>
+<ul>
+<li>£1,339.99 NVIDIA RTX 4000 Ada (20 GB, 130 W, 6144 CUDA, 192 Tensor)</li>
+<li>£7,199.99 NVIDIA RTX 6000 Ada (48 GB, 300 W, 18176 CUDA, 568 Tensor)
+<ul>
+<li>Matches NVIDIA L40 (48 GB, 300 W, 18176 CUDA, 568 Tensor)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>£1,238.99 CPU (assuming DDDR5, older chips with DDR4 will be much cheaper)
+<ul>
+<li>£672.49 AMD EPYC 4584PX (32 vCPUs, 120 W, Zen 4c, AM5 dual-channel, maybe for a CPU farm?)</li>
+<li>£920.99 AMD EPYC 9124 (32 vCPUs, 200 W, Zen 4)</li>
+<li>£1,238.99 AMD EPYC 9135 (32 vCPUs, 200 W, Zen 5, <a href="https://justine.lol/matmul/">AVX512 uplift</a>)</li>
+<li>£2,699.99 AMD EPYC 9355P (64 vCPUs, 280 W, Zen 5)</li>
+</ul>
+</li>
+<li>~£1000 Motherboard
+<ul>
+<li>£994.99 Gigabyte AMD MZ33-AR0 (SP5)</li>
+<li>£169.99 ASUS PRIME B650-PLUS (AM5)</li>
+<li>£240.98 ASUS PRIME X870-P (AM5)</li>
+</ul>
+</li>
+<li>£ 2U or 4U or Tower Chassis</li>
+<li>£ JBOD chassis (to store bulk HDDs or SSDs, if needed, but like, 8x 4 TB M.2 is small enough...)
+<ul>
+<li>rack mount (may just fit right alongside/beneath server)</li>
+<li>even just a 2U or 4U would be plenty for now, let alone a full shelf of disk &quot;blades&quot;</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>~£3-4k UPS, ideally runs 24 hours at-load (500-800 W) (power cut at night, can respond next day)
+<ul>
+<li>most UPS units are &quot;small&quot;, only 1-2 hour @ 600 W, but enough for automatic shutdown
+<ul>
+<li>£2,850.00 APC Easy UPS On-Line SRV6KI Tower (1h 17 min @ 600 W, including VAT)</li>
+<li>£4,050.00 APC Easy UPS On-Line SRV6KRI 4U Rack (1h 17 min @ 600 W, including VAT)</li>
+<li>£4,140.00 APC Easy UPS On-Line SRV6KRILRK 4U Rack (1h 54 min @ 600 W, including VAT)
+<ul>
+<li>Supports 4 external SRV240RLBP-9A battery packs</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>so, (automatic) shutdown, logging, &quot;checkpoint&quot;, use &quot;autosave&quot; snapshots for a delta-based &quot;interrupt&quot; checkpoint/snapshot, so long as we can reliably flush to disk, still relying on good snapshot and backup management</li>
+<li>if we're at a co-lo of some description, this is likely something handled where they will have some X hours of backup generator fuel or batteries at the ready, though they might not be able to provide the hours of runtime, though they have some absolutely overbuilt power delivery anyway, so it takes a lot more for them to experience trouble at all</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>AI/GPU Cloud pricing
+<ul>
+<li>CoreWeave
+<ul>
+<li>...</li>
+</ul>
+</li>
+<li><a href="http://RunPod.io">RunPod.io</a>
+<ul>
+<li>...</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>VPS Cloud pricing
+<ul>
+<li>Hetzner (dedicated and volumes are stopped at account limits, can go higher)
+<ul>
+<li>€7.56/month Intel Xeon Gold (8 GB, 4 vCPUs, shared)</li>
+<li>€65.28/month AMD EPYC 7002 (32 GB, 16 vCPUs, shared)</li>
+<li>€230.39/month AMD EPYC 7003 or 9004 (128 GB, 32 vCPUs, dedicated)</li>
+<li>€57.59/month AMD EPYC 7003 or 9004 (32 GB, 8 vCPUs, dedicated)</li>
+<li>€52.80/month Volume (1000 GB, €0.0528/GB/month, including VAT)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Cloud pricing
+<ul>
+<li>Azure
+<ul>
+<li>£836.89/month D32ds v4 (128 GB, 32 vCPUs)</li>
+<li>£767.70/month NC16as T4 v3 (110 GB, 16 AMD EPYC 7v12 vCPUs, NVIDIA T4 (16 GB))
+<ul>
+<li>£488.88/month with 1yr reserved, £5,866.55 charged upfront</li>
+</ul>
+</li>
+<li>£430.4/month S70 HDD (16 TB)</li>
+<li>£215.2/month S60 HDD (8 TB)</li>
+</ul>
+</li>
+<li>Google
+<ul>
+<li>£713.33/month g2-standard-16 (64 GB, 16 vCPUs, NVIDIA L4 (24 GB))
+<ul>
+<li>£449.40/month with 1yr reserved</li>
+</ul>
+</li>
+<li>£853.91/month g2-standard-16 custom (128 GB, 16 vCPUs, NVIDIA L4 (24 GB))
+<ul>
+<li>£533.64/month with 1yr reserved</li>
+</ul>
+</li>
+<li>£1,078.43/month g2-standard-32 (128 GB, 32 vCPUs, NVIDIA L4 (24 GB))
+<ul>
+<li>£679.41/month with 1yr reserved</li>
+</ul>
+</li>
+<li>£281.91/month Cloud Storage (16 TB)</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
-            
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
             <script async type="text/javascript">
 /* From extension bierner.markdown-mermaid */
 /*! For license information please see index.bundle.js.LICENSE.txt */
