@@ -60,15 +60,47 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
       - 128 GB, Intel Core i9-13900 vPro (32 vCPUs, 8 + 16 cores, 220 W)
       - NVIDIA 4000 Ada
     - Workstation w/o a GPU is practical, OEMs have x1.5-x2.5 markup on GPUs
-- freestanding "build your own box" pricing
-  - workstation tower or "workstation" server
-    - based on personal experience, will likely just SSH/remote in from laptop either way
-    - so, server, yes?
-      - it can sit in a nicer location, co-lo if needed, easier integration with baseline UPS, networking, and cooling (fan noise somewhere else), "server/enterprise" grade components (motherboard, PSU) can be pricier, easier to integrate hot-swappable redundant parts (PSU), etc
-  - software
-    - XCP-ng or FreeBSD as bare-metal host for Xen (ZFS)
-      - Xen/bhyve provides GPU passthrough for Debian & Alpine VMs, doubt anything else needed
-  - ~£6500, ~£4800 in "compute", ~£1700 in storage
+- Freestanding "build your own box" pricing
+  - Workstation Tower or Rackmount Server?
+    - Will likely just SSH/remote in from laptop either way, so, server may be the best choice
+      - far from desk, co-lo if needed, easier to integrate hot-swappable redundant parts (PSU), UPS, networking, and cooling (fan noise somewhere else)
+      - downside is "server/enterprise" grade components can be pricier
+  - Software stack
+    - XCP-ng + Xen Orchestra as bare-metal host for Xen, primarily running FreeBSD 14 (ZFS) + bhyve
+      - Xen and bhyve have full GPU passthrough for Debian & Alpine VMs (if not via ports/Linuxulator)
+        - bhyve may need `vnc` enabled to give the driver a VGA buffer on FreeBSD and Windows guests
+        - NVIDIA closed-source drivers will probably be essential, c'est la vie
+  - ~£6600, ~£4800 in "compute", ~£1700 in storage, ~£100 for chassis & power
+    - £1,238.99 CPU (assuming DDDR5, older chips with DDR4 will be much cheaper, also used available)
+      - [SCAN AMD CPUs](https://www.scan.co.uk/shop/computer-hardware/cpu-amd-server/all)
+        - £672.49 AMD EPYC 4584PX (32 vCPUs, 120 W, Zen 4c, AM5 dual-channel, maybe for a CPU farm?)
+        - £659.99 AMD EPYC 8124P (32 vCPUs, 125W, Zen 4c, SP5)
+        - £920.99 AMD EPYC 9124 (32 vCPUs, 200 W, Zen 4)
+        - £1,238.99 AMD EPYC 9135 (32 vCPUs, 200 W, Zen 5, [AVX512](https://justine.lol/matmul/))
+        - £2,699.99 AMD EPYC 9355P (64 vCPUs, 280 W, Zen 5)
+    - ~£1000 Motherboard
+      - [SCAN SP5](https://www.scan.co.uk/shop/computer-hardware/motherboards-amd/all#t23.f2=SP5)
+        - £994.99 Gigabyte AMD MZ33-AR0
+      - [SCAN AM5](https://www.scan.co.uk/shop/computer-hardware/motherboards-amd/all#t23.f2=AM5)
+        - £169.99 ASUS PRIME B650-PLUS
+        - £240.98 ASUS PRIME X870-P
+    - £1,339.99 NVIDIA RTX 4000 Ada (20 GB, 130 W)
+      - [SCAN Workstation GPUs](https://www.scan.co.uk/shop/pro-graphics/nvidia-workstation-gpus/all)
+        - £1,339.99 NVIDIA RTX 4000 Ada (20 GB, 130 W, 6144 CUDA, 192 Tensor)
+        - £2,339.99 NVIDIA RTX 4500 Ada (24 GB, 210 W, 7680 CUDA, 240 Tensor)
+          - Matches NVIDIA L4
+        - £7,199.99 NVIDIA RTX 6000 Ada (48 GB, 300 W, 18176 CUDA, 568 Tensor)
+          - Matches NVIDIA L40
+          - Not the NVIDIA L40S (350 W variant that doubles Tensor performance)
+      - [SCAN Desktop GPUs](https://www.scan.co.uk/shop/computer-hardware/gpu-nvidia-gaming/all)
+        - £969.98 MSI NVIDIA GeForce RTX 4080 SUPER (16 GB, 320 W, 10240 CUDA, 320 Tensor)
+    - ~£1200 DDR5 ECC RDIMMs (256 GB)
+      - [SCAN DDR5 Server Kits](https://www.scan.co.uk/shop/computer-hardware/memory-ram/ddr5-server-ram-memory-kits-5600)
+        - £300 1x64 GB DDR5 ECC RDIMM (4800-5600 MT/s)
+          - £600 for 128 GB, £1200 for 256 GB, £4800 for 1 TB
+      - [SCAN DDR4 Server Kits](https://www.scan.co.uk/shop/computer-hardware/memory-ram/3200mhz-ddr4-server-ram-memory-kits)
+        - £170 1x64 GB DDR4 ECC RDIMM (3200 MT/s)
+          - £340 for 128 GB, £680 for 256 GB, £2720 for 1 TB
     - 20 TB + 10 TB redundancy, £800 in storage (HDDs) or £1500 in storage (SSDs)
       - £1,680 7x WD Blue SN5000 (4 TB) for 20 TB volume with 8 TB parity or parity + cold (example)
       - ~5 TB parity, ~5 TB cold spare (hot-swap and resilver/rebuild with)
@@ -85,29 +117,17 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
           - £240 WD Blue SN5000 (4 TB, £60.0/TB)
           - £750 WD_Black SN850X (8 TB, £93.74/TB)
           - £3,232.91 Solidigm D5-P5336 (30.72 TB, £105.24/TB)
-    - ~£1200 DDR5 ECC RDIMMs (256 GB, see [SCAN](https://www.scan.co.uk/shop/computer-hardware/memory-ram/ddr5-server-ram-memory-kits-5600))
-      - £300 1x64 GB DDR5 ECC RDIMM (4800-5600 MT/s)
-        - £600 for 128 GB, £1200 for 256 GB, £4800 for 1 TB
-      - £170 1x64 GB DDR4 ECC RDIMM (3200 MT/s)
-        - £340 for 128 GB, £680 for 256 GB, £2720 for 1 TB
-    - £1,339.99 NVIDIA RTX 4000 Ada (20 GB, 130 W)
-      - [SCAN Workstation GPUs](https://www.scan.co.uk/shop/pro-graphics/nvidia-workstation-gpus/all)
-        - £1,339.99 NVIDIA RTX 4000 Ada (20 GB, 130 W, 6144 CUDA, 192 Tensor)
-        - £7,199.99 NVIDIA RTX 6000 Ada (48 GB, 300 W, 18176 CUDA, 568 Tensor)
-          - Matches NVIDIA L40 (48 GB, 300 W, 18176 CUDA, 568 Tensor)
-    - £1,238.99 CPU (assuming DDDR5, older chips with DDR4 will be much cheaper)
-      - £672.49 AMD EPYC 4584PX (32 vCPUs, 120 W, Zen 4c, AM5 dual-channel, maybe for a CPU farm?)
-      - £920.99 AMD EPYC 9124 (32 vCPUs, 200 W, Zen 4)
-      - £1,238.99 AMD EPYC 9135 (32 vCPUs, 200 W, Zen 5, [AVX512 uplift](https://justine.lol/matmul/))
-      - £2,699.99 AMD EPYC 9355P (64 vCPUs, 280 W, Zen 5)
-    - ~£1000 Motherboard
-      - £994.99 Gigabyte AMD MZ33-AR0 (SP5)
-      - £169.99 ASUS PRIME B650-PLUS (AM5)
-      - £240.98 ASUS PRIME X870-P (AM5)
-    - £ 2U or 4U or Tower Chassis
-    - £ JBOD chassis (to store bulk HDDs or SSDs, if needed, but like, 8x 4 TB M.2 is small enough...)
+    - £100 PSU
+      - [SCAN Desktop PSU](https://www.scan.co.uk/shop/computer-hardware/power-supplies/all)
+        - £99.98 Seasonic Focus GX 850 (850W)
+    - £0.00 2U or 4U or Tower Chassis
+      - [SCAN Barebone Servers](https://www.scan.co.uk/shop/computer-hardware/servers/all)
+        - £2,538.49 Gigabyte R272-Z32 AMD EPYC 7002 Server (2U Rackmount, 24x NVMe Bays)
+        - £2,742.98 ASUS RS520A-E12-RS24U AMD EPYC 9004 Server (2U Rackmount, 24x NVMe Bays)
+    - £0.00 JBOD chassis (to store bulk HDDs or SSDs, if needed)
       - rack mount (may just fit right alongside/beneath server)
       - even just a 2U or 4U would be plenty for now, let alone a full shelf of disk "blades"
+      - but 8x 4 TB M.2 easily fits in a regular server / workstation
   - ~£3-4k UPS, ideally runs 24 hours at-load (500-800 W) (power cut at night, can respond next day)
     - most UPS units are "small", only 1-2 hour @ 600 W, but enough for automatic shutdown
       - £2,850.00 APC Easy UPS On-Line SRV6KI Tower (1h 17 min @ 600 W, including VAT)
