@@ -140,9 +140,9 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
     - so, (automatic) shutdown, logging, "checkpoint", use "autosave" snapshots for a delta-based "interrupt" checkpoint/snapshot, so long as we can reliably flush to disk, still relying on good snapshot and backup management
     - if we're at a co-lo of some description, this is likely something handled where they will have some X hours of backup generator fuel or batteries at the ready, though they might not be able to provide the hours of runtime, though they have some absolutely overbuilt power delivery anyway, so it takes a lot more for them to experience trouble at all
 - AI/GPU Cloud pricing
-  - CoreWeave
+  - [CoreWeave](https://www.coreweave.com/gpu-cloud-pricing)
     - ...
-  - RunPod.io
+  - [RunPod.io](https://www.runpod.io/pricing)
     - ...
 - VPS Cloud pricing
   - Hetzner (dedicated and volumes are stopped at account limits, can go higher)
