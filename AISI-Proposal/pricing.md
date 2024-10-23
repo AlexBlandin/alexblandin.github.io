@@ -70,7 +70,7 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
       - Xen and bhyve have full GPU passthrough for Debian & Alpine VMs (if not via ports/Linuxulator)
         - bhyve may need `vnc` enabled to give the driver a VGA buffer on FreeBSD and Windows guests
         - NVIDIA closed-source drivers will probably be essential, c'est la vie
-  - ~£6600, ~£4800 in "compute", ~£1700 in storage, ~£100 for chassis & power
+  - ~£7000, ~£4800 in "compute", ~£1700 in storage, ~£500 for chassis & power
     - £1,238.99 CPU (assuming DDDR5, older chips with DDR4 will be much cheaper, also used available)
       - [SCAN AMD CPUs](https://www.scan.co.uk/shop/computer-hardware/cpu-amd-server/all)
         - £672.49 AMD EPYC 4584PX (32 vCPUs, 120 W, Zen 4c, AM5 dual-channel, maybe for a CPU farm?)
@@ -117,17 +117,20 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
           - £240 WD Blue SN5000 (4 TB, £60.0/TB)
           - £750 WD_Black SN850X (8 TB, £93.74/TB)
           - £3,232.91 Solidigm D5-P5336 (30.72 TB, £105.24/TB)
-    - £100 PSU
+    - £100 PSU (for desktop/tower grade) or 2x £200 server PSU (though barebone servers come with)
       - [SCAN Desktop PSU](https://www.scan.co.uk/shop/computer-hardware/power-supplies/all)
         - £99.98 Seasonic Focus GX 850 (850W)
-    - £0.00 2U or 4U or Tower Chassis
+      - [Mouser Rackmount PSU](https://www.mouser.co.uk/c/power/power-supplies/rack-mount-power-supplies/)
+        - £208.02 Delta Electronics CRPS (1300 W, Platinum 90, 1U)
+    - £100 2U or 4U or Tower Chassis
       - [SCAN Barebone Servers](https://www.scan.co.uk/shop/computer-hardware/servers/all)
-        - £2,538.49 Gigabyte R272-Z32 AMD EPYC 7002 Server (2U Rackmount, 24x NVMe Bays)
-        - £2,742.98 ASUS RS520A-E12-RS24U AMD EPYC 9004 Server (2U Rackmount, 24x NVMe Bays)
+        - £2,538.49 Gigabyte R272-Z32 AMD EPYC 7002 Server (2U Rackmount, 24x NVMe Bays, 2x 1200W)
+        - £2,742.98 ASUS RS520A-E12-RS24U AMD EPYC 9004 Server (2U Rackmount, 24x NVMe Bays, 2x 1600W)
     - £0.00 JBOD chassis (to store bulk HDDs or SSDs, if needed)
       - rack mount (may just fit right alongside/beneath server)
       - even just a 2U or 4U would be plenty for now, let alone a full shelf of disk "blades"
       - but 8x 4 TB M.2 easily fits in a regular server / workstation
+        - see barebones with 24x 2.5" bays for NVMe, we can fit more than enough storage to begin with
   - ~£3-4k UPS, ideally runs 24 hours at-load (500-800 W) (power cut at night, can respond next day)
     - most UPS units are "small", only 1-2 hour @ 600 W, but enough for automatic shutdown
       - £2,850.00 APC Easy UPS On-Line SRV6KI Tower (1h 17 min @ 600 W, including VAT)
