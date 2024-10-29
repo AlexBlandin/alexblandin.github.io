@@ -71,7 +71,7 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
         - bhyve may need `vnc` enabled to give the driver a VGA buffer on FreeBSD and Windows guests
         - NVIDIA closed-source drivers will probably be essential, c'est la vie
     - Data Science / Processing
-      - DuckDB, Postgres + `pgvector`, Ibis, NumPy, Numba, SciPy, PySR, FAISS
+      - DuckDB, Postgres (`pgvector`, `pgai`/`pgvectorscale`), Python, Ibis, NumPy, Numba, SciPy, PySR, FAISS (and assorted vector similarity / (k-)nearest-neighbour search (`DiskANN`), caching (e.g. Varnish), filters (both bloom/cuckoo/XOR filters (e.g. Bitfunnel) and particle/Kalman filters), (inverted) indexing methods, and underlying trees (e.g. for B/T/R(*) trees and BK/PH/(M)VP/M/cover metric trees) or skiplists, like `SortedContainers`)
     - ML
       - Keras 3.0 (JAX, PyTorch, TensorFlow)
       - [JAX](https://github.com/n2cholas/awesome-jax)
