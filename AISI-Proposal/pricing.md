@@ -1,7 +1,7 @@
 
 # Tentative pricing for drafting a budget (2024-10-22)
 
-A good example of some more realistic cloud-native (spot) pricing is given in [RETRO Is Blazingly Fast](https://mitchgordon.me/ml/2022/07/01/retro-is-blazing.html) where the cost (~$1k) was largely dominated by re-embedding the entire dataset (note, they did not re-train):
+A good example of some more realistic cloud-native (spot) pricing is given in [RETRO Is Blazingly Fast](https://mitchgordon.me/ml/2022/07/01/retro-is-blazing.html) where the cost (~$1k) was largely dominated by re-embedding the entire dataset (note, they did not re-train), as quoted below:
 
 > Tokenization takes around 1.9 min / 1M chunks on your standard CPU core. The Pile ends up being around 5.8B chunks (370B tokens), so that means you’re looking at ~180 hours of CPU time to tokenize, which you can easily parallelize down to only a few hours of wall time.
 >
@@ -21,18 +21,19 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
 >
 > This also applies to models that are already using a single GPU. By shrinking your model with RETRO’s database, requests get served faster, meaning more GPU bang for your buck. Instead of serving 60 req / hour on a single GPU, you’re serving 600+, just for a little extra CPU RAM.
 >
-> FAISS has the ability to memory map an index, which allows you to read it directly from disk instead of allocating RAM for it. This is slightly slower, of course, but probably worth the trade. (Thanks rom1504.)
+> FAISS has the ability to memory map an index, which allows you to read it directly from disk instead of allocating RAM for it. This is slightly slower, of course, but probably worth the trade.
 
 - Expected Hardware Requirements (Initial Pass)
-  - 20+ TB storage (size of RETRO embeddings, bigger vector DB & indices is good price/performance)
-    - "best" managed as a JBOD, but ~4 HDDs (or SSDs) are easy to fit in a workstation/server
-      - JBOD: "just a bunch of disks"
+  - minimum 20 TB HDD or SSD storage, ideally 40–80+ TB SSD storage (not including redundancy/spares)
+    - 20 TB RETRO embeddings, but scaling storage for vector DB & indices is a cost-effective uplift
+    - "best practice" is a JBOD, but 20 TB as ~4 HDDs (or SSDs) easily fits in a workstation/server
+      - JBOD: "just a bunch of disks", secondary chassis with disks, data plane, power, and networking
       - we will want some measure of redundancy (ZFS/RAID and cold spares for resilver/rebuild)
-      - backups will need to be handled, Backblaze could be a good "quick and dirty" approach
-  - ideally 256 GB RAM, minimum 64-128 GB, ECC RDIMMs are a must
-  - ideally 32-64 vCPUs, potentially, minimum 24 vCPUs (16 cores or 8+16 cores)
+      - backups will need to be handled, cloud is an option ($6/TB/month Backblaze/B2)
+  - ideally 256–512 GB DRAM, minimum 128 GB, ECC RDIMMs are a must, can scale to 1–2 TB DRAM
+  - ideally 32–64 vCPUs (16–32 cores, SMT/Hyper-threading), minimum 24 vCPUs (12 cores)
   - sufficient bandwidth
-  - 1x 20 GB GPU should suffice, can spot rent 4-8+ GPU configs if needed (AI/GPU cloud)
+  - 1x 20 GB VRAM GPU should suffice, can spot rent 4–8+ GPU configs if needed (AI/GPU cloud)
 - Example "one box" workstation pricing
   - Stone (without VAT) (and no GPU! so not even "one box")
     - £3264.68 Lenovo ThinkStation P620
@@ -71,7 +72,7 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
         - bhyve may need `vnc` enabled to give the driver a VGA buffer on FreeBSD and Windows guests
         - NVIDIA closed-source drivers will probably be essential, c'est la vie
     - Data Science / Processing
-      - DuckDB (`pg_analytics`, `usearch`), Postgres (`pgvector`/`Lantern`/`pgvecto.rs`, `pgai`/`pgvectorscale`), Python, Ibis, NumPy, Numba, SciPy, PySR, FAISS/`usearch` (and assorted vector similarity / (k-)nearest-neighbour search (`DiskANN`), caching (e.g. Varnish), filters (both bloom/cuckoo/XOR filters (e.g. Bitfunnel) and particle/Kalman filters), (inverted) indexing methods, and underlying trees (e.g. for B/T/R(*) trees and BK/PH/(M)VP/M/cover metric trees) or skiplists, like `SortedContainers`)
+      - DuckDB (`pg_analytics`, `usearch` (2–20x FAISS)), Postgres (`pgvector`/`Lantern`/`pgvecto.rs`, `pgai`/`pgvectorscale`), Python, [Ibis](https://ibis-project.org), NumPy, Numba, SciPy, PySR, FAISS/`usearch` (and assorted vector similarity / (k-/approximate-)nearest-neighbour search (`DiskANN`), caching (e.g. Varnish), filters (both Bloom/Cuckoo/XOR filters (e.g. Bitfunnel) and particle/Kalman filters), (inverted) indexing methods, and underlying trees (e.g. for B/T/R(*) trees and BK/PH/(M)VP/M/cover metric trees) or skiplists, like `SortedContainers`)
     - ML
       - Keras 3.0 (JAX, PyTorch, TensorFlow)
       - [JAX](https://github.com/n2cholas/awesome-jax)
@@ -85,6 +86,7 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
       - interpretML (EBM, DiCE, GAM Changer), scikit-learn / sklearn
       - Kolmogorov-Arnold Networks (KAN)
         - `pykan`, `efficient-kan`, `FourierKAN`, `GraphKAN`, `kanrl`
+      - `UCall`
     - Visualisation
       - HoloViz (handles Bokeh, Matplotlib, and Plotly, supports seaborn and graphviz)
   - ~£7000, ~£4800 in "compute", ~£1700 in storage, ~£500 for chassis & power
@@ -94,7 +96,9 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
         - £659.99 AMD EPYC 8124P (32 vCPUs, 125W, Zen 4c, SP5)
         - £920.99 AMD EPYC 9124 (32 vCPUs, 200 W, Zen 4)
         - £1,238.99 AMD EPYC 9135 (32 vCPUs, 200 W, Zen 5)
+          - Initial pick
         - £2,699.99 AMD EPYC 9355P (64 vCPUs, 280 W, Zen 5)
+          - Ideal pick
       - AVX512 Support is essential for [significant performance uplifts](https://justine.lol/matmul/)
         - Zen 4 and Zen 5 support it, of which Zen 5 has a 2x AVX512 uplift comparable to Sapphire Rapids
           - Alexander J. Yee's AVX512 Teardowns (@Mysticial of Y-Cruncher)
@@ -112,6 +116,7 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
     - £1,339.99 NVIDIA RTX 4000 Ada (20 GB, 130 W)
       - [SCAN Workstation GPUs](https://www.scan.co.uk/shop/pro-graphics/nvidia-workstation-gpus/all)
         - £1,339.99 NVIDIA RTX 4000 Ada (20 GB, 130 W, 6144 CUDA, 192 Tensor)
+          - Initial Pick
         - £2,339.99 NVIDIA RTX 4500 Ada (24 GB, 210 W, 7680 CUDA, 240 Tensor)
           - Matches NVIDIA L4
         - £7,199.99 NVIDIA RTX 6000 Ada (48 GB, 300 W, 18176 CUDA, 568 Tensor)
@@ -130,13 +135,13 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
       - £1,680 7x WD Blue SN5000 (4 TB) for 20 TB volume with 8 TB parity or parity + cold (example)
       - ~5 TB parity, ~5 TB cold spare (hot-swap and resilver/rebuild with)
       - see [Disk Prices](https://diskprices.com/?locale=uk) and [Mouser](https://www.mouser.co.uk)
-        - £15-25/TB HDDs (£300-500 / 20 TB), would use mixed drives, [see Drive Stats](https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data)
+        - £15–25/TB HDDs (£300–500 / 20 TB), would use mixed drives, [see Drive Stats](https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data)
           - £235 Seagate Exos X18 Enterprise Class (16 TB, £14.69/TB)
           - £210 Seagate IronWolf Pro (14 TB, £15.00/TB)
           - £360 Toshiba MG Enterprise (22 TB, £16.36/TB)
           - £228 WD Red Plus NAS (10 TB, £22.81/TB)
           - £195 WD_BLACK D10 (8 TB, £24.38/TB)
-        - £50-60/TB SSDs (£1000-2000 / 20 TB), better performance & reliability at higher cost
+        - £50–60/TB SSDs (£1000–2000 / 20 TB), better performance & reliability at higher cost
           - £190 Kingston NV2 (4 TB SSD, £47.50/TB)
           - £101 Samsung 990 EVO (2 TB, £50.60/TB)
           - £240 WD Blue SN5000 (4 TB, £60.0/TB)
@@ -151,19 +156,18 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
       - [SCAN Barebone Servers](https://www.scan.co.uk/shop/computer-hardware/servers/all)
         - £2,538.49 Gigabyte R272-Z32 AMD EPYC 7002 Server (2U Rackmount, 24x NVMe Bays, 2x 1200W)
         - £2,742.98 ASUS RS520A-E12-RS24U AMD EPYC 9004 Server (2U Rackmount, 24x NVMe Bays, 2x 1600W)
-    - £0.00 JBOD chassis (to store bulk HDDs or SSDs, if needed)
-      - rack mount (may just fit right alongside/beneath server)
+    - £0.00 JBOD chassis (to store bulk HDDs or SSDs) (optional)
       - even just a 2U or 4U would be plenty for now, let alone a full shelf of disk "blades"
       - but 8x 4 TB M.2 easily fits in a regular server / workstation
-        - see barebones with 24x 2.5" bays for NVMe, we can fit more than enough storage to begin with
-  - ~£3-4k UPS, ideally runs 24 hours at-load (500-800 W) (power cut at night, can respond next day)
-    - most UPS units are "small", only 1-2 hour @ 600 W, but enough for automatic shutdown
-      - £2,850.00 APC Easy UPS On-Line SRV6KI Tower (1h 17 min @ 600 W, including VAT)
-      - £4,050.00 APC Easy UPS On-Line SRV6KRI 4U Rack (1h 17 min @ 600 W, including VAT)
-      - £4,140.00 APC Easy UPS On-Line SRV6KRILRK 4U Rack (1h 54 min @ 600 W, including VAT)
+        - barebones 2U with 24x 2.5" NVMe bays, so JBOD is not required at current expected disk count
+  - ~£3-4k UPS, ideally runs 24 hours at-load (500–800 W) (e.g. next-day response to a power cut)
+    - most UPS units are "small", only 1–2 hour @ 600 W, but enough for automatic shutdown
+      - £2,850.00 APC Easy UPS On-Line SRV6KI Tower (1 hr 17 min @ 600 W, including VAT)
+      - £4,050.00 APC Easy UPS On-Line SRV6KRI 4U Rack (1 hr 17 min @ 600 W, including VAT)
+      - £4,140.00 APC Easy UPS On-Line SRV6KRILRK 4U Rack (1 hr 54 min @ 600 W, including VAT)
         - Supports 4 external SRV240RLBP-9A battery packs
     - so, (automatic) shutdown, logging, "checkpoint", use "autosave" snapshots for a delta-based "interrupt" checkpoint/snapshot, so long as we can reliably flush to disk, still relying on good snapshot and backup management
-    - if we're at a co-lo of some description, this is likely something handled where they will have some X hours of backup generator fuel or batteries at the ready, though they might not be able to provide the hours of runtime, though they have some absolutely overbuilt power delivery anyway, so it takes a lot more for them to experience trouble at all
+    - if we're at a co-location, this is likely something handled where they will have some X hours of backup generator fuel or batteries at the ready, and have overbuilt power delivery with stringent SLAs, power issues are highly unexpected (but still bring a UPS as above, just in case)
 - AI/GPU Cloud Pricing
   - [CoreWeave](https://www.coreweave.com/gpu-cloud-pricing)
     - ...
