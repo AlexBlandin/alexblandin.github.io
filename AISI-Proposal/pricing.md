@@ -71,7 +71,7 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
         - bhyve may need `vnc` enabled to give the driver a VGA buffer on FreeBSD and Windows guests
         - NVIDIA closed-source drivers will probably be essential, c'est la vie
     - Data Science / Processing
-      - DuckDB, Postgres (`pgvector`, `pgai`/`pgvectorscale`), Python, Ibis, NumPy, Numba, SciPy, PySR, FAISS (and assorted vector similarity / (k-)nearest-neighbour search (`DiskANN`), caching (e.g. Varnish), filters (both bloom/cuckoo/XOR filters (e.g. Bitfunnel) and particle/Kalman filters), (inverted) indexing methods, and underlying trees (e.g. for B/T/R(*) trees and BK/PH/(M)VP/M/cover metric trees) or skiplists, like `SortedContainers`)
+      - DuckDB (`pg_analytics`, `usearch`), Postgres (`pgvector`/`Lantern`/`pgvecto.rs`, `pgai`/`pgvectorscale`), Python, Ibis, NumPy, Numba, SciPy, PySR, FAISS/`usearch` (and assorted vector similarity / (k-)nearest-neighbour search (`DiskANN`), caching (e.g. Varnish), filters (both bloom/cuckoo/XOR filters (e.g. Bitfunnel) and particle/Kalman filters), (inverted) indexing methods, and underlying trees (e.g. for B/T/R(*) trees and BK/PH/(M)VP/M/cover metric trees) or skiplists, like `SortedContainers`)
     - ML
       - Keras 3.0 (JAX, PyTorch, TensorFlow)
       - [JAX](https://github.com/n2cholas/awesome-jax)
@@ -93,8 +93,16 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
         - £672.49 AMD EPYC 4584PX (32 vCPUs, 120 W, Zen 4c, AM5 dual-channel, maybe for a CPU farm?)
         - £659.99 AMD EPYC 8124P (32 vCPUs, 125W, Zen 4c, SP5)
         - £920.99 AMD EPYC 9124 (32 vCPUs, 200 W, Zen 4)
-        - £1,238.99 AMD EPYC 9135 (32 vCPUs, 200 W, Zen 5, [AVX512](https://justine.lol/matmul/))
+        - £1,238.99 AMD EPYC 9135 (32 vCPUs, 200 W, Zen 5)
         - £2,699.99 AMD EPYC 9355P (64 vCPUs, 280 W, Zen 5)
+      - AVX512 Support is essential for [significant performance uplifts](https://justine.lol/matmul/)
+        - Zen 4 and Zen 5 support it, of which Zen 5 has a 2x AVX512 uplift comparable to Sapphire Rapids
+          - Alexander J. Yee's AVX512 Teardowns (@Mysticial of Y-Cruncher)
+            - [Zen 4 Teardown](https://www.mersenneforum.org/node/21615#post614191)
+            - [Zen 5 Teardown](http://www.numberworld.org/blogs/2024_8_7_zen5_avx512_teardown/)
+        - Zen 5 surpasses Sapphire Rapids and potentially even Granite Rapids (t.b.d.)
+        - 512 bit SIMD will become ubiquitous via AMD's 256 bit double-pump, as in Intel's AVX10.2
+        - For CPU training and inference, plus vector similarity, encoding, embedding, and assorted tasks, efficient AVX512 will dominate, reduce hardware requirements, and enable large DRAM amounts to overwhelm (relatively) small VRAM to surpass GPU due to lower latency at sufficient throughput, particularly when backed by NVMe (AVX512 being the Xeon Phi successor)
     - ~£1000 Motherboard
       - [SCAN SP5](https://www.scan.co.uk/shop/computer-hardware/motherboards-amd/all#t23.f2=SP5)
         - £994.99 Gigabyte AMD MZ33-AR0
