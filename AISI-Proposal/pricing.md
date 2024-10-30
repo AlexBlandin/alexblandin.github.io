@@ -107,6 +107,7 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
         - 512 bit SIMD will become ubiquitous via AMD's 256 bit double-pump, as in Intel's AVX10.2
         - For CPU training and inference, plus vector similarity, encoding, embedding, and assorted tasks, efficient AVX512 will dominate, reduce hardware requirements, and enable large DRAM amounts to overwhelm (relatively) small VRAM to surpass GPU due to lower latency at sufficient throughput, particularly when backed by NVMe (AVX512 being the Xeon Phi successor)
       - Intel Granite Rapids is comparable to AMD Turin (Zen 5), Sierra Forest to Turin Dense (Zen 5c)
+      - Expect no higher than 4 GHz on all-core loads, particularly vectorised/SIMD, even on Zen 5
     - ~£1000 Motherboard
       - [SCAN SP5](https://www.scan.co.uk/shop/computer-hardware/motherboards-amd/all#t23.f2=SP5)
         - £994.99 Gigabyte AMD MZ33-AR0
@@ -131,8 +132,8 @@ A good example of some more realistic cloud-native (spot) pricing is given in [R
       - [SCAN DDR4 Server Kits](https://www.scan.co.uk/shop/computer-hardware/memory-ram/3200mhz-ddr4-server-ram-memory-kits)
         - £170 1x64 GB DDR4 ECC RDIMM (3200 MT/s)
           - £340 for 128 GB, £680 for 256 GB, £2720 for 1 TB
-      - 4x and 8x DRAM are essential in surpassing the ~60 GB/s for 2x DDR5 (5000 MT/s), which bottlenecks Zen 5 AVX512 with a ~20:1 instruction:load ratio on only 1 core, or ~340:1 per core in a 16 core chip (see Yee's Zen 5 Teardown for more, as mentioned there, memory is the primary bottleneck for HPC, and it's doubly so for ML training and inference, e.g. GPUs with under 20% utilisation as datasets/parameters spill out of memory, and then the overheads of communicating across multiple GPUs in an attempt to shard and operate in parallel)
-      - Current server chips support up-to DDR5 6400 MT/s in 8 or 12 channel mode, though Granite Rapids claims 8800 MT/s support, and this is not accounting for ECC overheads (~2:3 MOPs)
+      - 4x and 8x DRAM (or 12x) are essential in surpassing the ~60 GB/s for 2x DDR5 (5000 MT/s) for aggregate ~400–600 GB/s of bandwidth, as 60 GB/s will massively bottleneck Zen 5, with a single core only sustaining ~20:1 AVX512 instructions:loads, which multiplies out per core for ~300:1 or worse, without greater total bandwidth (see Yee's Zen 5 Teardown; as mentioned there, memory is the primary bottleneck for HPC, and it's doubly so for ML training and inference, e.g. GPUs with under 20% utilisation as datasets/parameters spill out of memory, and then the overheads of communicating across multiple GPUs in an attempt to shard and operate in parallel)
+      - Current server chips support up-to DDR5 6400 MT/s in 8 or 12 channel mode, though Granite Rapids claims 8800 MT/s support, and Turin [only supports 4400–6000 MT/s more broadly](https://chipsandcheese.com/p/amds-turin-5th-gen-epyc-launched), and this is not accounting for ECC overheads (~2:3 memory ops)
     - 20 TB + 10 TB redundancy, £800 in storage (HDDs) or £1500 in storage (SSDs)
       - £1,680 7x WD Blue SN5000 (4 TB) for 20 TB volume with 8 TB parity or parity + cold (example)
       - ~5 TB parity, ~5 TB cold spare (hot-swap and resilver/rebuild with)
